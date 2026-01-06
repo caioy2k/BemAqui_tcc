@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meus materiais - BemAqui</title>
+  <link rel="stylesheet" href="../base.css" />
+  <link rel="stylesheet" href="tela_doador_materiais.css" />
+</head>
+<body>
+  <header class="ba-header">
+    <div class="ba-header-inner">
+      <div class="ba-logo">BemAqui</div>
+      <nav class="ba-nav">
+        <a href="tela_doador.html">Minha área</a>
+        <a href="tela_doador_materiais.html" class="active">Materiais</a>
+        <a href="../tela_inicial.html">Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ba-main">
+    <section class="materials-section">
+      <div class="section-header">
+        <div>
+          <h1>Meus materiais recicláveis</h1>
+          <p>Gerencie os materiais que você cadastrou para doação.</p>
+        </div>
+        <button class="primary-btn" onclick="redirectToCadastro()">
+          + Cadastrar material
+        </button>
+      </div>
+
+      <div id="materials-container" class="materials-list">
+        <!-- materiais carregados via JS -->
+      </div>
+
+      <div id="empty-state" class="empty-state hidden">
+        <p>Você ainda não cadastrou nenhum material.</p>
+        <button class="primary-btn" onclick="redirectToCadastro()">
+          Cadastrar agora
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ba-footer">
+    <p>&copy; 2026 BemAqui. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="tela_doador_materiais.js"></script>
+</body>
+</html>

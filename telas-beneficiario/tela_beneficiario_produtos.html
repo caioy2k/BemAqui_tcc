@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Produtos disponíveis - BemAqui</title>
+  <link rel="stylesheet" href="../base.css" />
+  <link rel="stylesheet" href="tela_beneficiario_produtos.css" />
+</head>
+<body>
+  <header class="ba-header">
+    <div class="ba-header-inner">
+      <div class="ba-logo">BemAqui</div>
+      <nav class="ba-nav">
+        <a href="tela_beneficiario.html">Minha área</a>
+        <a href="tela_beneficiario_produtos.html" class="active">Produtos</a>
+        <a href="../tela_inicial.html">Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ba-main">
+    <section class="products-section">
+      <h1>Produtos disponíveis para troca</h1>
+      <p>Veja os itens que você pode trocar usando seus pontos.</p>
+
+      <div class="filters-bar">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Buscar por nome..."
+          class="search-input"
+        />
+        <select id="category-filter" class="category-select">
+          <option value="">Todas as categorias</option>
+          <option value="alimentos">Alimentos</option>
+          <option value="roupas">Roupas</option>
+          <option value="utensilio">Utensílio</option>
+          <option value="higiene">Higiene</option>
+        </select>
+      </div>
+
+      <div id="products-container" class="products-grid">
+        <!-- produtos carregados via JS -->
+      </div>
+
+      <div id="empty-state" class="empty-state hidden">
+        <p>Nenhum produto encontrado.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ba-footer">
+    <p>&copy; 2026 BemAqui. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="tela_beneficiario_produtos.js"></script>
+</body>
+</html>
