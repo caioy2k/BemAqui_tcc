@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cadastro - BemAqui</title>
-
-  <!-- estilos globais -->
   <link rel="stylesheet" href="base.css" />
-  <!-- estilos específicos da página de cadastro -->
   <link rel="stylesheet" href="tela_cadastro.css" />
 </head>
 <body>
@@ -14,19 +11,17 @@
     <div class="ba-header-inner">
       <div class="ba-logo">BemAqui</div>
       <nav class="ba-nav">
-        <a href="tela_inicial.html">Início</a>
-        <a href="tela_login.html">Entrar</a>
-        <a href="tela_cadastro.html" class="active">Cadastrar</a>
+        <a href="tela_inicial.html">Voltar</a>
       </nav>
     </div>
   </header>
 
   <main class="ba-main">
-    <section class="auth-section">
-      <h1>Crie sua conta</h1>
-      <p>Cadastre-se para participar das trocas de materiais recicláveis por benefícios.</p>
+    <section class="cadastro-section">
+      <h1>Criar conta</h1>
+      <p>Preencha os dados abaixo para se registrar</p>
 
-      <form id="register-form" class="auth-form">
+      <form id="cadastro-form" class="cadastro-form">
         <div class="form-group">
           <label for="name">Nome completo</label>
           <input
@@ -39,24 +34,14 @@
         </div>
 
         <div class="form-group">
-          <label for="email">E-mail</label>
+          <label for="email">Email</label>
           <input
             type="email"
             id="email"
             name="email"
-            placeholder="seuemail@exemplo.com"
+            placeholder="seu@email.com"
             required
           />
-        </div>
-
-        <div class="form-group">
-          <label for="role">Tipo de usuário</label>
-          <select id="role" name="role" required>
-            <option value="">Selecione...</option>
-            <option value="doador">Doador</option>
-            <option value="beneficiario">Beneficiário</option>
-            <option value="parceiro">Parceiro</option>
-          </select>
         </div>
 
         <div class="form-group">
@@ -65,28 +50,23 @@
             type="password"
             id="password"
             name="password"
-            placeholder="Mínimo 8 caracteres"
+            placeholder="••••••••"
             required
           />
         </div>
 
         <div class="form-group">
-          <label for="passwordConfirm">Confirmar senha</label>
-          <input
-            type="password"
-            id="passwordConfirm"
-            name="passwordConfirm"
-            placeholder="Repita a senha"
-            required
-          />
+          <label for="role">Tipo de usuário</label>
+          <select id="role" name="role" required>
+            <option value="">Selecione...</option>
+            <option value="beneficiario">Beneficiário</option>
+            <option value="doador">Doador</option>
+            <option value="parceiro">Parceiro</option>
+          </select>
         </div>
 
         <button type="submit" class="primary-btn">Cadastrar</button>
-
-        <p class="auth-footer-text">
-          Já tem conta?
-          <a href="tela_login.html">Faça login</a>
-        </p>
+        <a href="tela_login.html" class="link-login">Já tem conta? Faça login</a>
       </form>
     </section>
   </main>
@@ -95,7 +75,6 @@
     <p>&copy; 2026 BemAqui. Todos os direitos reservados.</p>
   </footer>
 
-  
   <script src="tela_cadastro.js"></script>
 </body>
 </html>
