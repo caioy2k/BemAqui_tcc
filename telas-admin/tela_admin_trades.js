@@ -11,9 +11,28 @@ const tradeModal = document.getElementById("trade-modal");
 const tradeDetailsDiv = document.getElementById("trade-details");
 const modalActions = document.getElementById("modal-actions");
 
+// ✅ Função para pegar o token
+function getAuthHeader() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Você precisa estar logado.");
+    throw new Error("Token não encontrado");
+  }
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  };
+}
+
 async function loadTrades() {
   try {
-    const response = await fetch(`${API_URL}/trades`);
+    fetch(`${API_URL}/trades`, {
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Content-Type': 'application/json'
+  }
+})
+
     const data = await response.json();
 
     if (response.ok) {
@@ -21,7 +40,7 @@ async function loadTrades() {
       filteredTrades = [...allTrades];
       renderTrades();
     } else {
-      alert("Erro ao carregar trocas.");
+      alert(data.error || "Erro ao carregar trocas.");
     }
   } catch (error) {
     console.error("Erro:", error);
@@ -53,10 +72,13 @@ function renderTrades() {
 
     const createdDate = new Date(trade.createdAt).toLocaleDateString("pt-BR");
 
+    // ✅ Adicione esta verificação
+    const beneficiaryName = trade.beneficiaryId?.name || "Beneficiário Desconhecido";
+
     card.innerHTML = `
       <div class="trade-info">
         <p class="trade-id">${trade._id.substring(0, 8).toUpperCase()}</p>
-        <p class="trade-beneficiary">${trade.beneficiaryId.name || "Beneficiário"}</p>
+        <p class="trade-beneficiary">${beneficiaryName}</p>
         <p class="trade-items">
           <strong>${recyclablesStr}</strong> → <strong>${benefitsStr}</strong>
         </p>
@@ -74,6 +96,7 @@ function renderTrades() {
     tradesContainer.appendChild(card);
   });
 }
+
 
 function applyFilters() {
   const searchTerm = searchInput.value.toLowerCase();
@@ -95,6 +118,11 @@ function applyFilters() {
 
 function openTradeModal(trade) {
   currentTradeId = trade._id;
+  
+  // ✅ Adicione estas verificações
+  const beneficiaryName = trade.beneficiaryId?.name || "Não informado";
+  const beneficiaryEmail = trade.beneficiaryId?.email || "Não informado";
+
   tradeDetailsDiv.innerHTML = `
     <div class="detail-section">
       <h3>📋 Informações da Troca</h3>
@@ -111,11 +139,11 @@ function openTradeModal(trade) {
       <div class="detail-row">
         <div class="detail-row-item">
           <span>Beneficiário</span>
-          <strong>${trade.beneficiaryId.name}</strong>
+          <strong>${beneficiaryName}</strong>
         </div>
         <div class="detail-row-item">
           <span>Email</span>
-          <strong>${trade.beneficiaryId.email}</strong>
+          <strong>${beneficiaryEmail}</strong>
         </div>
       </div>
       <div class="detail-row">
@@ -177,6 +205,7 @@ function openTradeModal(trade) {
   tradeModal.classList.remove("hidden");
 }
 
+
 function closeTradeModal() {
   tradeModal.classList.add("hidden");
   currentTradeId = null;
@@ -188,9 +217,7 @@ async function approveTrade() {
   try {
     const response = await fetch(`${API_URL}/trades/${currentTradeId}/approve`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeader(), // ✅ Adicione o token
     });
 
     const data = await response.json();
@@ -216,9 +243,7 @@ async function rejectTrade() {
   try {
     const response = await fetch(`${API_URL}/trades/${currentTradeId}/reject`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeader(), // ✅ Adicione o token
       body: JSON.stringify({ reason }),
     });
 

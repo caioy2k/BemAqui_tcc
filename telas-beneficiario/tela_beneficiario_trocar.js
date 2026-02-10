@@ -1,8 +1,8 @@
 const API_URL = "http://localhost:3000";
 let recyclables = [];
 let benefits = [];
-let selectedRecyclables = []; // agora com quantidade
-let selectedBenefits = [];    // agora com quantidade
+let selectedRecyclables = [];
+let selectedBenefits = [];
 
 const recyclablesContainer = document.getElementById("recyclables-container");
 const benefitsContainer = document.getElementById("benefits-container");
@@ -15,27 +15,51 @@ const comparisonRequestedSpan = document.getElementById("comparison-requested");
 const comparisonStatus = document.getElementById("comparison-status");
 const confirmBtn = document.getElementById("confirm-trade-btn");
 
+// ======= CARREGAR ITENS =======
 async function loadItems() {
   try {
+    console.log("Carregando itens...");
+    
     const recyclablesRes = await fetch(`${API_URL}/recyclables`);
     const benefitsRes = await fetch(`${API_URL}/benefits`);
+
+    if (!recyclablesRes.ok || !benefitsRes.ok) {
+      throw new Error("Erro na resposta do servidor");
+    }
 
     const recyclablesData = await recyclablesRes.json();
     const benefitsData = await benefitsRes.json();
 
+    console.log("Recicláveis:", recyclablesData);
+    console.log("Benefícios:", benefitsData);
+
     recyclables = recyclablesData.recyclables || [];
     benefits = benefitsData.benefits || [];
+
+    if (recyclables.length === 0) {
+      console.warn("Nenhum reciclável encontrado");
+    }
+    if (benefits.length === 0) {
+      console.warn("Nenhum benefício encontrado");
+    }
 
     renderRecyclables();
     renderBenefits();
   } catch (error) {
     console.error("Erro ao carregar itens:", error);
-    alert("Erro ao carregar itens para troca.");
+    alert("Erro ao carregar itens para troca. Verifique o console.");
   }
 }
 
+// ======= RENDERIZAR ITENS =======
 function renderRecyclables() {
   recyclablesContainer.innerHTML = "";
+  
+  if (recyclables.length === 0) {
+    recyclablesContainer.innerHTML = "<p>Nenhum reciclável disponível</p>";
+    return;
+  }
+
   recyclables.forEach((item) => {
     const card = document.createElement("div");
     card.className = "item-card";
@@ -53,6 +77,12 @@ function renderRecyclables() {
 
 function renderBenefits() {
   benefitsContainer.innerHTML = "";
+  
+  if (benefits.length === 0) {
+    benefitsContainer.innerHTML = "<p>Nenhum benefício disponível</p>";
+    return;
+  }
+
   benefits.forEach((item) => {
     const card = document.createElement("div");
     card.className = "item-card";
@@ -68,14 +98,13 @@ function renderBenefits() {
   });
 }
 
+// ======= SELECIONAR/DESSELECIONAR =======
 function toggleRecyclable(item) {
   const index = selectedRecyclables.findIndex((r) => r._id === item._id);
-  
+
   if (index > -1) {
-    // Remove se já existe
     selectedRecyclables.splice(index, 1);
   } else {
-    // Adiciona com quantidade padrão 1
     selectedRecyclables.push({
       _id: item._id,
       name: item.name,
@@ -83,14 +112,14 @@ function toggleRecyclable(item) {
       quantity: 1,
     });
   }
-  
+
   updateRecyclablesDisplay();
   updateUI();
 }
 
 function toggleBenefit(item) {
   const index = selectedBenefits.findIndex((b) => b._id === item._id);
-  
+
   if (index > -1) {
     selectedBenefits.splice(index, 1);
   } else {
@@ -101,13 +130,13 @@ function toggleBenefit(item) {
       quantity: 1,
     });
   }
-  
+
   updateBenefitsDisplay();
   updateUI();
 }
 
+// ======= ATUALIZAR EXIBIÇÃO =======
 function updateRecyclablesDisplay() {
-  const card = document.getElementById(`recyclable-${selectedRecyclables.length > 0 ? selectedRecyclables[0]._id : ""}`);
   document.querySelectorAll(".item-card").forEach((c) => c.classList.remove("selected"));
   selectedRecyclables.forEach((item) => {
     const c = document.getElementById(`recyclable-${item._id}`);
@@ -115,7 +144,7 @@ function updateRecyclablesDisplay() {
   });
 
   selectedRecyclablesList.innerHTML = "";
-  
+
   if (selectedRecyclables.length === 0) {
     selectedRecyclablesList.innerHTML = '<p class="placeholder">Nenhum item selecionado</p>';
     return;
@@ -145,7 +174,7 @@ function updateBenefitsDisplay() {
   });
 
   selectedBenefitsList.innerHTML = "";
-  
+
   if (selectedBenefits.length === 0) {
     selectedBenefitsList.innerHTML = '<p class="placeholder">Nenhum item selecionado</p>';
     return;
@@ -167,6 +196,7 @@ function updateBenefitsDisplay() {
   });
 }
 
+// ======= MUDAR QUANTIDADE =======
 function changeQty(type, index, change) {
   const array = type === "recyclable" ? selectedRecyclables : selectedBenefits;
   array[index].quantity = Math.max(1, array[index].quantity + change);
@@ -192,6 +222,7 @@ function removeItem(type, index) {
   updateUI();
 }
 
+// ======= ATUALIZAR UI =======
 function updateUI() {
   const offeredPoints = selectedRecyclables.reduce(
     (sum, item) => sum + item.pointsValue * item.quantity,
@@ -222,18 +253,12 @@ function updateUI() {
   }
 }
 
-
-
-
-
-
-
-
-
-
+// ======= CONFIRMAR TROCA =======
 confirmBtn.addEventListener("click", async () => {
   const storedUser = localStorage.getItem("bemaquiUser");
-  if (!storedUser) {
+  const token = localStorage.getItem("token");
+
+  if (!storedUser || !token) {
     alert("Você precisa estar logado.");
     return;
   }
@@ -257,10 +282,11 @@ confirmBtn.addEventListener("click", async () => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/trades`, {
+    const response = await fetch(`${API_URL}/trade/trades`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(tradeData),
     });
@@ -283,6 +309,7 @@ confirmBtn.addEventListener("click", async () => {
   }
 });
 
+// ======= MODAL DE CONFIRMAÇÃO =======
 function showConfirmationModal(trade) {
   const modal = document.createElement("div");
   modal.className = "confirmation-modal";
@@ -348,14 +375,22 @@ function showConfirmationModal(trade) {
 
       <div class="confirmation-footer">
         <button onclick="closeConfirmationModal()" class="btn-close">
-          Fechar
+          OK, Entendi!
         </button>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
+  
+  // ✅ Fechar ao clicar fora do card
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeConfirmationModal();
+    }
+  });
 }
+
 
 function closeConfirmationModal() {
   const modal = document.querySelector(".confirmation-modal");
@@ -364,58 +399,5 @@ function closeConfirmationModal() {
   }
 }
 
-
-
-
-
-
-
-
-
-
-  const user = JSON.parse(storedUser);
-
-  const tradeData = {
-    beneficiaryId: user._id,
-    recyclablesOffered: selectedRecyclables.map((item) => ({
-      recyclableId: item._id,
-      recyclableName: item.name,
-      quantity: item.quantity,
-      pointsPerUnit: item.pointsValue,
-    })),
-    benefitsRequested: selectedBenefits.map((item) => ({
-      benefitId: item._id,
-      benefitName: item.name,
-      quantity: item.quantity,
-      pointsCost: item.pointsCost,
-    })),
-  };
-
-  try {
-    const response = await fetch(`${API_URL}/trades`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tradeData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("Troca realizada com sucesso! Aguardando aprovação do administrador.");
-      selectedRecyclables = [];
-      selectedBenefits = [];
-      updateRecyclablesDisplay();
-      updateBenefitsDisplay();
-      updateUI();
-    } else {
-      alert(data.error || "Erro ao realizar troca.");
-    }
-  } catch (error) {
-    console.error("Erro:", error);
-    alert("Não foi possível realizar a troca.");
-  }
-;
-
+// ======= INICIALIZAR =======
 document.addEventListener("DOMContentLoaded", loadItems);

@@ -29,6 +29,22 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // 🪙 NOVO: Carteira Digital
+  wallet: {
+    balance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalEarned: {
+      type: Number,
+      default: 0,
+    },
+    totalSpent: {
+      type: Number,
+      default: 0,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -37,13 +53,10 @@ const userSchema = new mongoose.Schema({
 
 // Middleware: Criptografar senha ANTES de salvar
 userSchema.pre("save", async function () {
-  // Se a senha não foi modificada, passa direto
   if (!this.isModified("password")) {
     return;
   }
-
   try {
-    // Hash da senha com salt de 10
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
   } catch (err) {
@@ -51,9 +64,28 @@ userSchema.pre("save", async function () {
   }
 });
 
-// Método: Comparar senha (útil no login)
+// Método: Comparar senha
 userSchema.methods.comparePassword = async function (passwordToCompare) {
   return await bcrypt.compare(passwordToCompare, this.password);
+};
+
+// Método: Adicionar moedas à carteira
+userSchema.methods.addCoins = async function (amount, reason = "trade") {
+  this.wallet.balance += amount;
+  this.wallet.totalEarned += amount;
+  await this.save();
+  return this.wallet.balance;
+};
+
+// Método: Remover moedas da carteira
+userSchema.methods.removeCoins = async function (amount, reason = "trade") {
+  if (this.wallet.balance < amount) {
+    throw new Error("Saldo insuficiente na carteira");
+  }
+  this.wallet.balance -= amount;
+  this.wallet.totalSpent += amount;
+  await this.save();
+  return this.wallet.balance;
 };
 
 module.exports = mongoose.model("User", userSchema);
